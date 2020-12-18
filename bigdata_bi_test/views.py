@@ -1,8 +1,7 @@
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, HttpRequest
 from celery_tasks import tasks
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
-schedule, create = IntervalSchedule.objects.get_or_create(
-    every=10, period=IntervalSchedule.SECONDS)
+from django.views.decorators.http import require_GET, require_POST
 
 
 def task_test_one(request):
@@ -15,39 +14,64 @@ def task_test_two(request):
     return HttpResponse("ok")
 
 
-def task_test_create(request):
-    # tasks.my_task2.delay()
-    PeriodicTask.objects.create(
-        interval=schedule, name='myTest', task="celery_tasks.tasks.my_task2")
-    res = IntervalSchedule.objects.all()
-    print("有任务数：", len(res), PeriodicTask.objects.get(name="myTest").enabled)
+def task_test_three(request):
+    tasks.my_task3.delay()
     return HttpResponse("ok")
 
 
+@require_GET
+def task_test_create(request):
+    task_name = request.GET.get("name")
+    # tasks.my_task2.delay()
+    schedule, create = IntervalSchedule.objects.get_or_create(
+        every=10, period=IntervalSchedule.SECONDS)
+    print("task_test_create", schedule, create)
+    PeriodicTask.objects.create(
+        interval=schedule, name=task_name, task="celery_tasks.tasks.my_task2")
+    res = IntervalSchedule.objects.all()
+    print("有任务数：", len(res), PeriodicTask.objects.get(name=task_name).enabled)
+    return HttpResponse("ok")
+
+
+@require_GET
 def task_test_stop(request):
+    task_name = request.GET.get("name")
     # tasks.my_task2.delay()
     res = IntervalSchedule.objects.all()
-    print("有任务数：", len(res), PeriodicTask.objects.get(name="myTest").enabled)
+    print("有任务数：", len(res), PeriodicTask.objects.get(name=task_name).enabled)
 
-    cur_task = PeriodicTask.objects.get(name="myTest")
+    cur_task = PeriodicTask.objects.get(name=task_name)
     cur_task.enabled = False
     cur_task.save()
     return HttpResponse("stop")
 
 
+@require_GET
 def task_test_restart(request):
-    cur_task = PeriodicTask.objects.get(name="myTest")
+    task_name = request.GET.get("name")
+    cur_task = PeriodicTask.objects.get(name=task_name)
     cur_task.enabled = True
     cur_task.save()
     return HttpResponse("restart")
 
 
+@require_GET
 def task_test_del(request):
+    task_name = request.GET.get("name")
     res = IntervalSchedule.objects.all()
-    print("有任务数：", len(res), PeriodicTask.objects.get(name="myTest").enabled)
+    print("有任务数：", len(res), PeriodicTask.objects.get(name=task_name).enabled)
 
-    cur_task = PeriodicTask.objects.get(name="myTest")
+    cur_task = PeriodicTask.objects.get(name=task_name)
     cur_task.enabled = False
     cur_task.save()
-    PeriodicTask.objects.get(name = "myTest").delete()
+    cur_task.delete()
     return HttpResponse("delete")
+
+
+@require_GET
+def task_nums(request):
+    res = PeriodicTask.objects.all()
+    print("有任务数：", len(res))
+    for item in res:
+        print(item)
+    return JsonResponse(res, safe=False)
