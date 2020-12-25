@@ -23,6 +23,7 @@ urlpatterns = [
     path('task/two/', views.task_test_two),
     path('task/three/', views.task_test_three),
     path('task/add/', views.task_test_create),
+    path('task/update/', views.task_test_update),
     path('task/stop/', views.task_test_stop),
     path('task/restart/', views.task_test_restart),
     path('task/del/', views.task_test_del),

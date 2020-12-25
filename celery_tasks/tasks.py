@@ -1,5 +1,6 @@
 from celery import shared_task
 
+
 @shared_task
 def my_taks1(a, b, c):
     print("任务my_taks1函数正在执行.....")
@@ -12,5 +13,5 @@ def my_task2():
 
 
 @shared_task
-def my_task3():
-    print("任务my_task3函数正在执行.....")
+def my_task3(taskSource):
+    print("任务my_task3函数正在执行.....", taskSource)
