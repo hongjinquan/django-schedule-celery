@@ -23,3 +23,6 @@ __all__ = ('celery_app',)
 1. 数据库实例生成：python manager.py migrate
 1. django项目启动：python manager.py runserver
 2. celery管理器启动：supervisord -c ./supervisord.conf
+
+
+### 对大家有帮助的话，可以用您金贵的手指点个star。再次谢过！！！欢迎大家PR！！！
